@@ -1,0 +1,267 @@
+<!DOCYPTE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Safari iOS - apps only -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!-- Chrome for Android - NEW! -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="images/brand.png">
+    <link rel="shortcut icon" href="images/favicon.ico">
+    
+    <title>StreamLayer | Esri DC Services</title>
+    
+    <style>
+      html, body {
+        width: 100%; height: 100%;
+        margin: 0; padding: 0;
+        overflow: hidden;
+      }
+      
+      #splash {
+        position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
+        z-index: 999999;
+        background: black url('images/splash.gif') no-repeat center center;
+      }
+      
+      .container {
+        //padding-left: 15px !important;
+        //padding-right: 15px !important;
+      }
+      
+      .navbar-inverse .navbar-brand {
+        font-size: 18px !important;
+        color: #FFF !important;
+        line-height: 18px !important;
+      }
+      
+      .navbar-brand {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+      }
+      
+      .navbar-brand-image {
+        height: 34px !important;
+        margin-left: -10px !important;
+        margin-right: 10px !important;
+        margin-top: 4px !important;
+      }
+      
+      #mapDiv {
+        min-height: 50%;
+        max-height: 50%;
+      }
+      
+      .tab-pane {
+        margin-top: 1em !important;
+      }
+    </style>
+    
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/esri/css/esri.css" />
+    <link rel="stylesheet" type="text/css" href="./libs/bootstrap-map-js/css/bootstrapmap.css"> 
+  </head>
+  <body>
+    <!-- splash screen -->
+    <div id="splash"></div>
+    
+    <div class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#"><img class="navbar-brand-image" src="images/brand.png" />StreamLayer Example</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6">
+          <div style="margin-bottom: 1em;">
+            <h1 style="display: inline;">StreamLayer</h1>
+            <h3 style="display: inline;" class="text-muted">using Node.js</h3>
+          </div>
+          
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#about" data-toggle="tab">About</a></li>
+            <li><a href="#server" data-toggle="tab">Server</a></li>
+            <li><a href="#client" data-toggle="tab">Client</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div class="tab-pane active" id="about">
+              <div class="col-sm-12">
+                <label class="col-sm-9 control-label">Stream Layer</label>
+                <div class="col-sm-3">
+                  <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-default">
+                      <input type="radio" name="strmlyrstatus" value="1" id="option1">On
+                    </label>
+                    <label class="btn btn-default active">
+                      <input type="radio" name="strmlyrstatus" value="0" id="option2">Off
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="server">
+              
+            </div>
+            <div class="tab-pane" id="client">
+              
+            </div>
+          </div>
+        
+        </div>
+        <div class="col-sm-6">
+          <div id="mapDiv"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="container">
+        <hr />
+        <div class="pull-left text-muted">
+          Jim Blaney
+        </div>
+        <div class="pull-right text-muted">
+          Esri DC Services
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+    
+    <script>
+      var dojoConfig = {
+        async: true,
+        parseOnLoad: false
+      };
+    </script>
+    <script src="http://js.arcgis.com/3.8/"></script>
+    <script>
+      require([
+        "dojo/dom",
+        "dojo/dom-construct",
+        "dojo/_base/fx",
+        "dojo/on",
+        "dojo/topic",
+        "./libs/bootstrap-map-js/js/bootstrapmap.js",
+        "esri/layers/StreamLayer",
+        "esri/InfoTemplate",
+        "esri/geometry/jsonUtils",
+        "esri/geometry/webMercatorUtils",
+        "dojo/domReady!"
+      ], function(dom, domConstruct, fx, on, topic, BootstrapMap, StreamLayer, InfoTemplate, jsonUtils, webMercatorUtils) {
+        var layerDefinition = {
+          "geometryType": "esriGeometryPoint",
+          "timeInfo": {
+            "startTimeField": "time",
+            "endTimeField": null,
+            "trackIdField": "trackId",
+            "timeReference": null,
+            "timeInterval": 1,
+            "timeIntervalUnits": "esriTimeUnitsMinutes",
+            "exportOptions": {
+              "useTime": true,
+              "timeDataCumulative": false,
+              "timeOffset": null,
+              "timeOffsetUnits": null
+            },
+            "hasLiveData": true
+          },
+          "fields": [
+            {
+              name: "ObjectId",
+              type: "esriFieldTypeOID",
+              alias: "ObjectId"
+            },
+            {
+              name: "trackId",
+              type: "esriFieldTypeInteger",
+              alias: "Track ID"
+            },
+            {
+              name: "time",
+              type: "esriFieldTypeString",
+              alias: "Longitude"
+            }
+          ]
+        };
+
+        var map = window.MAP = BootstrapMap.create("mapDiv", {
+          basemap: "national-geographic",
+          center: [-77.41061530151237, 39.46553809650358],
+          zoom: 15
+        });
+        if (!!dom.byId("splash")) {
+          fx.fadeOut({
+            node: "splash",
+            duration: 500,
+            delay: 1000,
+            onEnd: domConstruct.destroy
+          }).play();
+        }
+        var streamLayer = null;
+        var featureCollection = null;
+        topic.subscribe('/streamLayer/enabled', function(e) {
+          if (e.enabled) {
+            featureCollection = {
+              "layerDefinition": null,
+              "featureSet": {
+                "features": [],
+                "geometryType": "esriGeometryPoint"
+              }
+            };
+            featureCollection.layerDefinition = layerDefinition;
+            streamLayer = new StreamLayer(featureCollection, {
+              socketUrl: "ws://mbook.local:8080/",
+              purgeOptions: { displayCount: 500 },
+              trackIdField: featureCollection.layerDefinition.timeInfo.trackIdField,
+              infoTemplate: new InfoTemplate("${*}" )
+            });
+            streamLayer.on("message", function(message) {
+              map.setExtent(map.extent.centerAt(webMercatorUtils.geographicToWebMercator(jsonUtils.fromJson(message[0].geometry))));
+              
+            });
+            map.addLayer(streamLayer);
+          } else {
+            if (streamLayer !== null) {
+              streamLayer.suspend();
+              streamLayer.disconnect();
+              streamLayer.clear();
+              map.removeLayer(streamLayer);
+              streamLayer = null;
+            }
+          }
+        });
+      });
+    </script>
+    
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    
+    <script>
+      $(function() {
+        $("input[name='strmlyrstatus']").change(function() {
+          var layerEnabled = false;
+          $.each($("input[name='strmlyrstatus']"), function(index, element) {
+            if ($(element).is(':checked')) {
+              layerEnabled = ($(element).attr('value') != 0);
+            }
+          });
+          require(['dojo/topic'], function(topic) {
+            topic.publish('/streamLayer/enabled', { enabled: layerEnabled });
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
