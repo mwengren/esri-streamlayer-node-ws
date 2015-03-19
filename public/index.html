@@ -162,7 +162,7 @@
       ], function(dom, domConstruct, fx, on, topic, BootstrapMap, StreamLayer, InfoTemplate, jsonUtils, webMercatorUtils) {
         var layerDefinition = {
           "geometryType": "esriGeometryPoint",
-          "timeInfo": {
+          /*"timeInfo": {
             "startTimeField": "time",
             "endTimeField": null,
             "trackIdField": "trackId",
@@ -176,30 +176,50 @@
               "timeOffsetUnits": null
             },
             "hasLiveData": true
-          },
+          },*/
           "fields": [
             {
-              name: "ObjectId",
-              type: "esriFieldTypeOID",
-              alias: "ObjectId"
-            },
-            {
-              name: "trackId",
-              type: "esriFieldTypeInteger",
-              alias: "Track ID"
+              name: "name",
+              type: "esriFieldTypeString",
+              alias: "Name"
             },
             {
               name: "time",
               type: "esriFieldTypeString",
-              alias: "Longitude"
+              alias: "Valid Time"
+            },
+            {
+              name: "air_pressure",
+              type: "esriFieldTypeDouble",
+              alias: "Air Pressure"
+            },
+            {
+              name: "air_temperature",
+              type: "esriFieldTypeDouble",
+              alias: "Air Temperature"
+            },
+            {
+              name: "wind_speed",
+              type: "esriFieldTypeDouble",
+              alias: "Wind Speed"
+            },
+            {
+              name: "wind_gust",
+              type: "esriFieldTypeDouble",
+              alias: "Wind Speed"
+            },
+            {
+              name: "wind_direction",
+              type: "esriFieldTypeDouble",
+              alias: "Wind Direction"
             }
           ]
         };
 
         var map = window.MAP = BootstrapMap.create("mapDiv", {
           basemap: "national-geographic",
-          center: [-77.41061530151237, 39.46553809650358],
-          zoom: 15
+          center: [-118.2257, 33.7683],
+          zoom: 13
         });
         if (!!dom.byId("splash")) {
           fx.fadeOut({
@@ -222,9 +242,9 @@
             };
             featureCollection.layerDefinition = layerDefinition;
             streamLayer = new StreamLayer(featureCollection, {
-              socketUrl: "ws://mbook.local:8080/",
+              socketUrl: "ws://localhost:8080/weather_obs_stream",
               purgeOptions: { displayCount: 500 },
-              trackIdField: featureCollection.layerDefinition.timeInfo.trackIdField,
+              /*trackIdField: featureCollection.layerDefinition.timeInfo.trackIdField,*/
               infoTemplate: new InfoTemplate("${*}" )
             });
             streamLayer.on("message", function(message) {
