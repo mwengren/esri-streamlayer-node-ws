@@ -84,7 +84,7 @@
         <div class="col-sm-6">
           <div style="margin-bottom: 1em;">
             <h1 style="display: inline;">StreamLayer</h1>
-            <h3 style="display: inline;" class="text-muted">using Node.js</h3>
+            <h3 style="display: inline;" class="text-muted">using VertX</h3>
           </div>
           
           <!-- Nav tabs -->
@@ -254,7 +254,7 @@
             });
             streamLayer.on("message", function(message) {
               map.setExtent(map.extent.centerAt(webMercatorUtils.geographicToWebMercator(jsonUtils.fromJson(message[0].geometry))));
-              
+              console.log(message);
             });
             map.addLayer(streamLayer);
           } else {
